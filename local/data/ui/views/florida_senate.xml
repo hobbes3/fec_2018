@@ -1,0 +1,27 @@
+<dashboard>
+  <row>
+    <panel>
+      <viz type="viz_halo.halo">
+        <search>
+          <query>index=fec 
+| lookup candidates.csv candidate_id output name as candidate.name 
+| stats sum(expenditure_amount) as count by committee.name committee_id candidate.name toward 
+| eventstats sum(count) as total 
+| eventstats sum(count) as candidate_total by candidate.name 
+| where candidate_total/total&gt;0.05
+| rename committee.name as outer candidate.name as inner toward as ribbon 
+| eval ribbon_color=if(ribbon="supporting", "green", "red") 
+| fields - committee_id</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </viz>
+    </panel>
+  </row>
+</dashboard>

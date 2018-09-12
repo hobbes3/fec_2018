@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+# Rename this file to fec_creds.py
+
+API_KEY = "DEMO_KEY"
