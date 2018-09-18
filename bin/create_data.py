@@ -72,8 +72,8 @@ candidate_lookup_header = [
 candidate_parameters = {
     #"state": "FL",
     "has_raised_funds": True,
-    #"office": ["H", "S"],
-    "office": "S",
+    "office": ["H", "S"],
+    #"office": "S",
     "candidate_status": "C",
     "sort": "name",
 }
@@ -116,7 +116,7 @@ with open(SPLUNK_APP_PATH + "/lookups/candidates.csv", "wb") as csvfile:
         else:
             page += 1
 
-logger.debug("fl_candidates.csv done. Total elapsed seconds: {}".format(time.time() - start_time))
+logger.debug("candidates.csv done. Total elapsed seconds: {}".format(time.time() - start_time))
 
 #committee_lookup_header = [
 #    "committee_id",

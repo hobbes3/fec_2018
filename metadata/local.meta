@@ -3,7 +3,8 @@ owner = admin
 version = 7.1.2
 modtime = 1536659547.682695000
 
-[views/florida_senate]
+[savedsearches/draft]
+export = none
 owner = admin
 version = 7.1.2
-modtime = 1536791872.082844000
+modtime = 1537265357.687853000
