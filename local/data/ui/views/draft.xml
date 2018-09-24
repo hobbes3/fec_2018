@@ -1,4 +1,5 @@
 <dashboard>
+  <label>http://hobbes3-4.local:8000/en-US/app/fec_schedule_e_2018/draft/edit#</label>
   <row>
     <panel>
       <viz type="viz_halo.halo">
@@ -12,7 +13,7 @@
 | eval candidate_pct=candidate_total/total*100
 | eval committee_pct=committee_total/total*100
 | where candidate_pct&gt;2
-| eval committee.name=if(committee_pct&gt;1, 'committee.name', "others")
+| eval committee.name=if(committee_pct&gt;0.2, 'committee.name', "others")
 | eval candidate.name=replace('candidate.name', ", .+$", "")." - ".state
 | stats sum(spent) as spent by candidate_id committee.name candidate.name toward party
 | rename committee.name as outer candidate.name as inner toward as ribbon spent as count
@@ -36,7 +37,7 @@
         <option name="viz_halo.halo.draggable">on</option>
         <option name="viz_halo.halo.label_font_size">13</option>
         <option name="viz_halo.halo.label_relax_delta">2</option>
-        <option name="viz_halo.halo.outer_colors">schemeCategory20b</option>
+        <option name="viz_halo.halo.outer_colors">schemeCategory20</option>
         <option name="viz_halo.halo.thickness">10</option>
         <option name="viz_halo.halo.width">1500</option>
       </viz>
