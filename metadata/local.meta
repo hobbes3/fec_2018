@@ -3,8 +3,7 @@ owner = admin
 version = 7.1.2
 modtime = 1536659547.682695000
 
-[savedsearches/draft]
-export = none
+[views/draft]
 owner = admin
 version = 7.1.2
-modtime = 1537265357.687853000
+modtime = 1537826465.207382000
