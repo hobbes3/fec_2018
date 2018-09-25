@@ -1,5 +1,5 @@
 <dashboard>
-  <label>http://hobbes3-4.local:8000/en-US/app/fec_schedule_e_2018/draft/edit#</label>
+  <label>Draft</label>
   <row>
     <panel>
       <viz type="viz_halo.halo">
@@ -22,8 +22,8 @@
 | eval inner_color=case(party="REP", "red", party="DEM", "blue", 0=0, "grey")
 | table outer inner inner_color inner_img ribbon count ribbon_color
 | sort 0 outer</query>
-          <earliest>0</earliest>
-          <latest></latest>
+          <earliest>1483257600</earliest>
+          <latest>now</latest>
           <sampleRatio>1</sampleRatio>
         </search>
         <option name="drilldown">none</option>
@@ -38,6 +38,7 @@
         <option name="viz_halo.halo.label_font_size">13</option>
         <option name="viz_halo.halo.label_relax_delta">2</option>
         <option name="viz_halo.halo.outer_colors">schemeCategory20</option>
+        <option name="viz_halo.halo.outer_thickness">15</option>
         <option name="viz_halo.halo.thickness">10</option>
         <option name="viz_halo.halo.width">1500</option>
       </viz>
