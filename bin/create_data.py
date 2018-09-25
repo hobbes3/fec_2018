@@ -40,8 +40,8 @@ SPLUNK_APP_PATH = os.path.abspath(os.path.join(__file__ , "../.."))
 LOG_ROTATION_BYTES = 25 * 1024 * 1024
 LOG_ROTATION_LIMIT = 10000
 
-# Before retrying first wait 1 second, then another 1, then another 1, then 30, then 60, then finally retry every 300 seconds.
-RETRY_SLEEP = [1, 1, 1, 30, 60, 300]
+# Before retrying first wait 1 second, then another 1, then another 1, then 30, then 60, etc.
+RETRY_SLEEP = [1, 1, 1, 30, 60]
 
 logger = logging.getLogger('logger_debug')
 logger.setLevel(logging.DEBUG)
@@ -70,10 +70,8 @@ candidate_lookup_header = [
 ]
 
 candidate_parameters = {
-    #"state": "FL",
     "has_raised_funds": True,
     "office": ["H", "S"],
-    #"office": "S",
     "candidate_status": "C",
     "sort": "name",
 }
@@ -274,16 +272,6 @@ def run_fec_api(request):
                 error_msg = "Unexpected error: {} - sleeping for _SEC_ seconds(s)".format(sys.exc_info()[0])
                 retries = retry(retries, error_msg)
                 pass
-
-#test = {
-#    "url": "/schedules/schedule_e/",
-#    "filename": "clinton_schedule_e.json",
-#    "parameters": {
-#        "candidate_id": "P00003392"
-#    }
-#}
-#
-#run_fec_api(test)
 
 # http://stackoverflow.com/a/28463266/1150923
 pool = ThreadPool(THREADS)

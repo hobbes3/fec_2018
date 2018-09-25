@@ -1,10 +1,18 @@
-<dashboard>
+<form>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="office" searchWhenChanged="true">
+      <label>Office</label>
+      <choice value="S">Senate</choice>
+      <choice value="H">House</choice>
+      <default>S</default>
+    </input>
+  </fieldset>
   <row>
     <panel>
       <map>
         <title>Select a state</title>
         <search>
-          <query>index=fec 
+          <query>index=fec sourcetype=fec_schedule_e office=S
 | stats sum(expenditure_amount) as spent by candidate_id
 | lookup candidates.csv candidate_id output state
 | stats sum(spent) as count by state
@@ -45,4 +53,4 @@
       </map>
     </panel>
   </row>
-</dashboard>
+</form>

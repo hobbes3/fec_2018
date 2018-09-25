@@ -4,7 +4,7 @@
     <panel>
       <viz type="viz_halo.halo">
         <search>
-          <query>index=fec 
+          <query>index=fec sourcetype=fec_schedule_e office=S
 | stats sum(expenditure_amount) as spent first(committee.name) as committee.name by committee_id candidate_id toward
 | lookup candidates.csv candidate_id output name as candidate.name party state
 | eventstats sum(spent) as total 
