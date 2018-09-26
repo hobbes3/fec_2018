@@ -1,5 +1,5 @@
 <form>
-  <fieldset submitButton="false">
+  <fieldset submitButton="false" autoRun="true">
     <input type="dropdown" token="office" searchWhenChanged="true">
       <label>Office</label>
       <choice value="S">Senate</choice>
@@ -12,19 +12,19 @@
       <map>
         <title>Select a state</title>
         <search>
-          <query>index=fec sourcetype=fec_schedule_e office=S
+          <query>index=fec sourcetype=fec_schedule_e office=$office$
 | stats sum(expenditure_amount) as spent by candidate_id
 | lookup candidates.csv candidate_id output state
 | stats sum(spent) as count by state
 | lookup state_abbr.csv state output state_full as featureId
 | geom geo_us_states
-| fields - state</query>
+| table feature* count geom *</query>
           <earliest>1483257600</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
         </search>
-        <option name="drilldown">none</option>
-        <option name="mapping.choroplethLayer.colorBins">5</option>
+        <option name="drilldown">all</option>
+        <option name="mapping.choroplethLayer.colorBins">9</option>
         <option name="mapping.choroplethLayer.colorMode">sequential</option>
         <option name="mapping.choroplethLayer.maximumColor">0xaf575a</option>
         <option name="mapping.choroplethLayer.minimumColor">0x62b3b2</option>
@@ -50,7 +50,69 @@
         <option name="trellis.enabled">0</option>
         <option name="trellis.scales.shared">1</option>
         <option name="trellis.size">medium</option>
+        <drilldown>
+          <set token="state">$row.state$</set>
+        </drilldown>
       </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <viz type="viz_halo.halo">
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$
+| stats sum(expenditure_amount) as spent first(name) as candidate.name first(committee.name) first(state) first(party) by committee_id candidate_id toward
+| rename first(*) as *
+| eventstats sum(spent) as total 
+| eventstats sum(spent) as candidate_total by candidate.name 
+| eventstats sum(spent) as committee_total by committee.name
+| eval candidate_pct=candidate_total/total*100
+| eval committee_pct=committee_total/total*100
+| eval committee.name=if(committee_pct&gt;0.2, 'committee.name', "others")
+| eval candidate.name=case(candidate_pct&gt;2, replace('candidate.name', ", .+$", "")." - ".state, party="DEM", "OTHERS DEM", party="REP", "OTHERS REP", 0=0, "OTHERS")
+| stats sum(spent) as spent by candidate_id committee.name candidate.name toward party
+| rename committee.name as outer candidate.name as inner toward as ribbon spent as count
+| eval candidate_id=case(inner="OTHERS DEM", "DEM", inner="OTHERS REP", "REP", 0=0, candidate_id)
+| eval inner_img="/static/app/fec_schedule_e_2018/".candidate_id.".jpg"
+| eval ribbon_color=if(ribbon="supporting", "green", "#d9d9d9")
+| eval inner_color=case(party="REP", "#d8241e", party="DEM", "#1576b6", 0=0, "grey")
+| table outer inner inner_color inner_img ribbon count ribbon_color
+| sort 0 outer</query>
+          <earliest>1483257600</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">821</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="viz_halo.halo.auto_transition">never</option>
+        <option name="viz_halo.halo.auto_transition_sleep">5000</option>
+        <option name="viz_halo.halo.draggable">on</option>
+        <option name="viz_halo.halo.label_font_size">13</option>
+        <option name="viz_halo.halo.label_relax_delta">2</option>
+        <option name="viz_halo.halo.outer_colors">schemeCategory20c</option>
+        <option name="viz_halo.halo.outer_thickness">15</option>
+        <option name="viz_halo.halo.thickness">10</option>
+        <option name="viz_halo.halo.width">1000</option>
+      </viz>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$
+| timechart sum(expenditure_amount) by name</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
     </panel>
   </row>
 </form>

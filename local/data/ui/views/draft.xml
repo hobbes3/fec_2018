@@ -16,9 +16,10 @@
 | eval candidate.name=case(candidate_pct&gt;2, replace('candidate.name', ", .+$", "")." - ".state, party="DEM", "OTHERS DEM", party="REP", "OTHERS REP", 0=0, "OTHERS")
 | stats sum(spent) as spent by candidate_id committee.name candidate.name toward party
 | rename committee.name as outer candidate.name as inner toward as ribbon spent as count
+| eval candidate_id=case(inner="OTHERS DEM", "DEM", inner="OTHERS REP", "REP", 0=0, candidate_id)
 | eval inner_img="/static/app/fec_schedule_e_2018/".candidate_id.".jpg"
-| eval ribbon_color=if(ribbon="supporting", "green", "orange")
-| eval inner_color=case(party="REP", "red", party="DEM", "blue", 0=0, "grey")
+| eval ribbon_color=if(ribbon="supporting", "green", "#d9d9d9")
+| eval inner_color=case(party="REP", "#d8241e", party="DEM", "#1576b6", 0=0, "grey")
 | table outer inner inner_color inner_img ribbon count ribbon_color
 | sort 0 outer</query>
           <earliest>1483257600</earliest>
@@ -36,10 +37,10 @@
         <option name="viz_halo.halo.draggable">on</option>
         <option name="viz_halo.halo.label_font_size">13</option>
         <option name="viz_halo.halo.label_relax_delta">2</option>
-        <option name="viz_halo.halo.outer_colors">schemeCategory20</option>
+        <option name="viz_halo.halo.outer_colors">schemeCategory20c</option>
         <option name="viz_halo.halo.outer_thickness">15</option>
         <option name="viz_halo.halo.thickness">10</option>
-        <option name="viz_halo.halo.width">1500</option>
+        <option name="viz_halo.halo.width">1300</option>
       </viz>
     </panel>
   </row>
