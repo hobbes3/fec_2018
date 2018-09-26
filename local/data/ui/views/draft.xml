@@ -5,16 +5,15 @@
       <viz type="viz_halo.halo">
         <search>
           <query>index=fec sourcetype=fec_schedule_e office=S
-| stats sum(expenditure_amount) as spent first(committee.name) as committee.name by committee_id candidate_id toward
-| lookup candidates.csv candidate_id output name as candidate.name party state
+| stats sum(expenditure_amount) as spent first(name) as candidate.name first(committee.name) first(state) first(party) by committee_id candidate_id toward
+| rename first(*) as *
 | eventstats sum(spent) as total 
 | eventstats sum(spent) as candidate_total by candidate.name 
 | eventstats sum(spent) as committee_total by committee.name
 | eval candidate_pct=candidate_total/total*100
 | eval committee_pct=committee_total/total*100
-| where candidate_pct&gt;2
 | eval committee.name=if(committee_pct&gt;0.2, 'committee.name', "others")
-| eval candidate.name=replace('candidate.name', ", .+$", "")." - ".state
+| eval candidate.name=case(candidate_pct&gt;2, replace('candidate.name', ", .+$", "")." - ".state, party="DEM", "OTHERS DEM", party="REP", "OTHERS REP", 0=0, "OTHERS")
 | stats sum(spent) as spent by candidate_id committee.name candidate.name toward party
 | rename committee.name as outer candidate.name as inner toward as ribbon spent as count
 | eval inner_img="/static/app/fec_schedule_e_2018/".candidate_id.".jpg"
