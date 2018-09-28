@@ -1,10 +1,11 @@
 <dashboard>
-  <label>Draft</label>
+  <label>Senate Independent Expenditures</label>
   <row>
     <panel>
       <viz type="viz_halo.halo">
         <search>
           <query>index=fec sourcetype=fec_schedule_e office=S
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
 | stats sum(expenditure_amount) as spent first(name) as candidate.name first(committee.name) first(state) first(party) by committee_id candidate_id toward
 | rename first(*) as *
 | eventstats sum(spent) as total 
@@ -18,7 +19,7 @@
 | rename committee.name as outer candidate.name as inner toward as ribbon spent as count
 | eval candidate_id=case(inner="OTHERS DEM", "DEM", inner="OTHERS REP", "REP", 0=0, candidate_id)
 | eval inner_img="/static/app/fec_schedule_e_2018/".candidate_id.".jpg"
-| eval ribbon_color=if(ribbon="supporting", "green", "#d9d9d9")
+| eval ribbon_color=if(ribbon="supporting", "#24a222", "#d9d9d9")
 | eval inner_color=case(party="REP", "#d8241e", party="DEM", "#1576b6", 0=0, "grey")
 | table outer inner inner_color inner_img ribbon count ribbon_color
 | sort 0 outer</query>
@@ -39,6 +40,8 @@
         <option name="viz_halo.halo.label_relax_delta">2</option>
         <option name="viz_halo.halo.outer_colors">schemeCategory20c</option>
         <option name="viz_halo.halo.outer_thickness">15</option>
+        <option name="viz_halo.halo.padding_pack">40</option>
+        <option name="viz_halo.halo.radius_pack">350</option>
         <option name="viz_halo.halo.thickness">10</option>
         <option name="viz_halo.halo.width">1300</option>
       </viz>

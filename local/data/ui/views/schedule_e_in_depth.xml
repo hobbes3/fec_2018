@@ -1,0 +1,395 @@
+<form>
+  <label>In-depth House and Senate Independent Expenditures</label>
+  <fieldset submitButton="false" autoRun="true"></fieldset>
+  <row>
+    <panel>
+      <title>STEP 1</title>
+      <input type="dropdown" token="office" searchWhenChanged="true">
+        <label>Select an office</label>
+        <choice value="S">Senate</choice>
+        <choice value="H">House</choice>
+        <default>S</default>
+      </input>
+      <html/>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>STEP 2</title>
+      <input type="time" searchWhenChanged="true">
+        <label>Time picker</label>
+        <default>
+          <earliest>0</earliest>
+          <latest></latest>
+        </default>
+      </input>
+      <chart>
+        <title>Select a time range by dragging horizontally over the chart or use "Date Range" in the time picker above</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| timechart limit=20 sum(expenditure_amount) by state</query>
+          <earliest>1483257600</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <selection>
+          <set token="earliest">$start$</set>
+          <set token="latest">$end$</set>
+        </selection>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>STEP 3</title>
+      <input type="text" token="state" searchWhenChanged="true" depends="$hide$">
+        <label>state</label>
+      </input>
+      <input type="text" token="state_full" searchWhenChanged="true" depends="$hide$">
+        <label>state_full</label>
+      </input>
+      <map>
+        <title>Select a state</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| stats sum(expenditure_amount) as spent by candidate_id
+| lookup candidates.csv candidate_id output state
+| stats sum(spent) as count by state
+| lookup state_abbr.csv state output state_full as featureId
+| geom geo_us_states
+| table feature* count geom *</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">all</option>
+        <option name="mapping.choroplethLayer.colorBins">9</option>
+        <option name="mapping.choroplethLayer.colorMode">sequential</option>
+        <option name="mapping.choroplethLayer.maximumColor">0xaf575a</option>
+        <option name="mapping.choroplethLayer.minimumColor">0x62b3b2</option>
+        <option name="mapping.choroplethLayer.neutralPoint">0</option>
+        <option name="mapping.choroplethLayer.shapeOpacity">0.75</option>
+        <option name="mapping.choroplethLayer.showBorder">1</option>
+        <option name="mapping.data.maxClusters">100</option>
+        <option name="mapping.legend.placement">bottomright</option>
+        <option name="mapping.map.center">(38.75,-99.18)</option>
+        <option name="mapping.map.panning">1</option>
+        <option name="mapping.map.scrollZoom">0</option>
+        <option name="mapping.map.zoom">4</option>
+        <option name="mapping.markerLayer.markerMaxSize">50</option>
+        <option name="mapping.markerLayer.markerMinSize">10</option>
+        <option name="mapping.markerLayer.markerOpacity">0.8</option>
+        <option name="mapping.showTiles">1</option>
+        <option name="mapping.tileLayer.maxZoom">22</option>
+        <option name="mapping.tileLayer.minZoom">0</option>
+        <option name="mapping.tileLayer.tileOpacity">1</option>
+        <option name="mapping.tileLayer.url">http://mt.google.com/vt/lyrs=m&amp;x={x}&amp;y={y}&amp;z={z}</option>
+        <option name="mapping.type">choropleth</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <drilldown>
+          <set token="form.state">$row.state$</set>
+          <set token="form.state_full">$row.featureId$</set>
+        </drilldown>
+      </map>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Selected state</title>
+      <single>
+        <search>
+          <query>| makeresults | eval a=$state_full|s$ | table a</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0xf8be34","0xf1813f"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <single>
+        <title>Total expenditure spent</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| stats sum(expenditure_amount)</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">$</option>
+        <option name="unitPosition">before</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Total expenditure spent supporting</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$ toward=supporting
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| stats sum(expenditure_amount)</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="height">114</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">$</option>
+        <option name="unitPosition">before</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+    <panel>
+      <single>
+        <title>Total expenditure spent opposing</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$ toward=opposing
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| stats sum(expenditure_amount)</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="height">114</option>
+        <option name="numberPrecision">0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="rangeValues">[0,30,70,100]</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="trendColorInterpretation">standard</option>
+        <option name="trendDisplayMode">absolute</option>
+        <option name="unit">$</option>
+        <option name="unitPosition">before</option>
+        <option name="useColors">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <viz type="viz_halo.halo">
+        <title>Committee-candidate expenditure relationship</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| stats sum(expenditure_amount) as spent first(name) as candidate.name first(committee.name) first(state) first(party) by committee_id candidate_id toward
+| rename first(*) as *
+| eventstats sum(spent) as total 
+| eventstats sum(spent) as candidate_total by candidate.name 
+| eventstats sum(spent) as committee_total by committee.name
+| eval candidate_pct=candidate_total/total*100
+| eval committee_pct=committee_total/total*100
+| eval committee.name=if(committee_pct&gt;0.2, 'committee.name', "others")
+| eval candidate.name=case(candidate_pct&gt;2, replace('candidate.name', ", .+$", "")." - ".state, party="DEM", "OTHERS DEM", party="REP", "OTHERS REP", 0=0, "OTHERS")
+| stats sum(spent) as spent by candidate_id committee.name candidate.name toward party
+| rename committee.name as outer candidate.name as inner toward as ribbon spent as count
+| eval candidate_id=case(inner="OTHERS DEM", "DEM", inner="OTHERS REP", "REP", 0=0, candidate_id)
+| eval inner_img="/static/app/fec_schedule_e_2018/".candidate_id.".jpg"
+| eval ribbon_color=if(ribbon="supporting", "#24a222", "#d9d9d9")
+| eval inner_color=case(party="REP", "#d8241e", party="DEM", "#1576b6", 0=0, "grey")
+| table outer inner inner_color inner_img ribbon count ribbon_color
+| sort 0 outer</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="height">623</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+        <option name="viz_halo.halo.auto_transition">never</option>
+        <option name="viz_halo.halo.auto_transition_sleep">5000</option>
+        <option name="viz_halo.halo.draggable">on</option>
+        <option name="viz_halo.halo.label_font_size">13</option>
+        <option name="viz_halo.halo.label_relax_delta">2</option>
+        <option name="viz_halo.halo.label_wrap_length">500</option>
+        <option name="viz_halo.halo.outer_colors">schemeCategory20c</option>
+        <option name="viz_halo.halo.outer_thickness">15</option>
+        <option name="viz_halo.halo.thickness">10</option>
+        <option name="viz_halo.halo.width">700</option>
+      </viz>
+    </panel>
+    <panel>
+      <chart>
+        <title>Expenditure spent by party and action</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| eval label=party." - ".toward
+| stats sum(expenditure_amount) by label</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="height">607</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Expenditure spent over time by candidate (drag horizontally to zoom in)</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| timechart span=1d sum(expenditure_amount) by name</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.legend.placement">bottom</option>
+        <option name="height">185</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <title>The raw JSON events (formatted for readability)</title>
+        <search>
+          <query>index=fec sourcetype=fec_schedule_e office=$office$ state=$state$
+| dedup _time committee.committee_id candidate_id toward expenditure_amount
+| table _time state committee.name toward expenditure_amount name party *
+| fields - _raw date_* punct linecount time* committee.cycles{} splunk* source sourcetype index host</query>
+          <earliest>$earliest$</earliest>
+          <latest>$latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">50</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">true</option>
+        <option name="wrap">false</option>
+        <format type="color" field="toward">
+          <colorPalette type="map">{"opposing":#D9D9D9,"supporting":#24A222}</colorPalette>
+        </format>
+        <format type="color" field="expenditure_amount">
+          <colorPalette type="minMidMax" maxColor="#DC4E41" minColor="#FFFFFF"></colorPalette>
+          <scale type="minMidMax"></scale>
+        </format>
+        <format type="number" field="expenditure_amount">
+          <option name="precision">0</option>
+          <option name="unit">$</option>
+          <option name="unitPosition">before</option>
+        </format>
+      </table>
+    </panel>
+  </row>
+</form>

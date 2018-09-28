@@ -1,0 +1,5 @@
+<nav search_view="search">
+  <view name="schedule_e_in_depth" default="true"/>
+  <view name="schedule_e_senate"/>
+  <view name="search"/>
+</nav>

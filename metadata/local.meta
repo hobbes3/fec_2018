@@ -1,9 +1,15 @@
-[views/draft]
+[views/schedule_e_in_depth]
+export = none
 owner = admin
 version = 7.1.2
-modtime = 1537994939.254948000
+modtime = 1538092542.051528000
 
-[views/state_drilldown]
+[views/schedule_e_senate]
+export = none
 owner = admin
 version = 7.1.2
-modtime = 1537994522.404941000
+modtime = 1538091991.203814000
+
+[nav/default]
+version = 7.1.2
+modtime = 1538090484.202688000
