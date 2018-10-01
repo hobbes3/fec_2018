@@ -197,6 +197,7 @@ schedule_e_request = {
     "filename": "_schedule_e.json",
     "parameters": {
         "sort": "expenditure_amount",
+        "is_notice": False,
     }
 }
 
