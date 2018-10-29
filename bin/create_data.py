@@ -40,8 +40,8 @@ SPLUNK_APP_PATH = os.path.abspath(os.path.join(__file__ , "../.."))
 LOG_ROTATION_BYTES = 25 * 1024 * 1024
 LOG_ROTATION_LIMIT = 10000
 
-# Before retrying first wait 1 second, then another 1, then another 1, then 30, then 60, etc.
-RETRY_SLEEP = [1, 1, 1, 30, 60]
+# Before retrying first wait 1 second, then another 1, then another 1, then every 30 seconds.
+RETRY_SLEEP = [1, 1, 1, 30]
 
 logger = logging.getLogger('logger_debug')
 logger.setLevel(logging.DEBUG)
@@ -57,6 +57,39 @@ for fl in glob.glob(SPLUNK_APP_PATH + "/data/*.json"):
     os.remove(fl)
     logger.debug("Deleted {}".format(fl))
 
+def retry(retries, error_msg):
+    sleep_sec = RETRY_SLEEP[retries]
+
+    logger.debug(error_msg.replace("_SEC_", str(sleep_sec)))
+
+    time.sleep(sleep_sec)
+
+    if retries >= len(RETRY_SLEEP) - 1:
+        retries = len(RETRY_SLEEP) - 1
+    else:
+        retries += 1
+
+    return retries
+
+def url_open(url):
+    retries = 0
+
+    while True:
+        logger.debug(url)
+
+        try:
+            response = urllib2.urlopen(url)
+
+            return response.read().strip()
+        except urllib2.HTTPError as e:
+            error_msg = "Error code: {} - sleeping for _SEC_ seconds(s)".format(e.code)
+            retries = retry(retries, error_msg)
+            pass
+        #except:
+        #    error_msg = "Unexpected error: {} - sleeping for _SEC_ seconds(s)".format(sys.exc_info()[0])
+        #    retries = retry(retries, error_msg)
+        #    pass
+
 candidate_lookup_header = [
     "state",
     "candidate_id",
@@ -67,6 +100,7 @@ candidate_lookup_header = [
     "party",
     "party_full",
     "incumbent_challenge",
+    "schedule_a_total",
 ]
 
 candidate_parameters = {
@@ -81,6 +115,8 @@ parameters.update(candidate_parameters)
 
 candidate_ids = []
 
+row_count = 0
+
 with open(SPLUNK_APP_PATH + "/lookups/candidates.csv", "wb") as csvfile:
     candidate_lookup = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
     candidate_lookup.writerow(candidate_lookup_header)
@@ -91,30 +127,51 @@ with open(SPLUNK_APP_PATH + "/lookups/candidates.csv", "wb") as csvfile:
         url_parameters = urllib.urlencode(parameters, doseq=True)
         full_url = URL_BASE + "candidates/?" + url_parameters
 
-        logger.debug(full_url)
-
-        response = urllib2.urlopen(full_url)
-        data = response.read().strip()
-
+        data = url_open(full_url)
         parsed_json = json.loads(data)
 
         total_page = parsed_json["pagination"]["pages"]
 
         for candidate in parsed_json["results"]:
-            candidate_ids.append(candidate["candidate_id"])
+            candidate_id = candidate["candidate_id"]
+
+            candidate_ids.append(candidate_id)
 
             row = []
-            for key in candidate_lookup_header:
+            for key in candidate_lookup_header[:-1]:
                 row.append(candidate[key])
+
+            schedule_a_parameters = deepcopy(URL_PARAMETERS)
+            schedule_a_parameters.update({
+                "candidate_id": candidate_id
+            })
+
+            schedule_a_url_parameters = urllib.urlencode(schedule_a_parameters, doseq=True)
+            schedule_a_full_url = URL_BASE + "schedules/schedule_a/by_size/by_candidate/?" + schedule_a_url_parameters
+
+            schedule_a_data = url_open(schedule_a_full_url)
+            schedule_a_parsed_json = json.loads(schedule_a_data)
+
+            total = 0
+
+            for result in schedule_a_parsed_json["results"]:
+                total += result["total"] or 0
+
+            row.append(total)
 
             candidate_lookup.writerow(row)
 
-        if page>=total_page:
+            if TEST_LIMIT!=0 and row_count>TEST_LIMIT:
+                break
+
+            row_count += 1
+
+        if page>=total_page or TEST_LIMIT!=0 and row_count>TEST_LIMIT:
             break
         else:
             page += 1
 
-logger.debug("candidates.csv done. Total elapsed seconds: {}".format(time.time() - start_time))
+logger.debug("Candidates.csv done. Total elapsed seconds: {}".format(time.time() - start_time))
 
 #committee_lookup_header = [
 #    "committee_id",
@@ -144,9 +201,6 @@ logger.debug("candidates.csv done. Total elapsed seconds: {}".format(time.time()
 #
 #parameters = URL_PARAMETERS.copy()
 #parameters.update(committee_parameters)
-#
-#if TEST_LIMIT>0:
-#    candidate_ids = candidate_ids[:TEST_LIMIT]
 #
 #committee_ids = []
 #
@@ -198,7 +252,7 @@ schedule_e_request = {
     "parameters": {
         "sort": "expenditure_amount",
         "is_notice": False,
-    }
+    },
 }
 
 requests = []
@@ -206,23 +260,9 @@ requests = []
 for candidate_id in candidate_ids:
     request = deepcopy(schedule_e_request)
 
-    request["filename"] = candidate_id + "_schedule_e.json"
+    request["filename"] = candidate_id + request["filename"]
     request["parameters"]["candidate_id"] = candidate_id
     requests.append(request)
-
-def retry(retries, error_msg):
-    sleep_sec = RETRY_SLEEP[retries]
-
-    logger.debug(error_msg.replace("_SEC_", str(sleep_sec)))
-
-    time.sleep(sleep_sec)
-
-    if retries >= len(RETRY_SLEEP) - 1:
-        retries = len(RETRY_SLEEP) - 1
-    else:
-        retries += 1
-
-    return retries
 
 def run_fec_api(request):
     filename = SPLUNK_APP_PATH + "/data/" + request["filename"]
@@ -244,35 +284,17 @@ def run_fec_api(request):
         url_parameters = urllib.urlencode(parameters, doseq=True)
         full_url = URL_BASE + request["url"] + "?" + url_parameters
 
-        retries = 0
+        data = url_open(full_url)
+        parsed_json = json.loads(data)
 
-        while retries >= 0:
-            logger.debug(full_url)
+        last_indexes = parsed_json["pagination"]["last_indexes"]
 
-            try:
-                response = urllib2.urlopen(full_url)
-                data = response.read().strip()
-
-                parsed_json = json.loads(data)
-
-                last_indexes = parsed_json["pagination"]["last_indexes"]
-
-                if last_indexes is None:
-                    logger.info("Done for {}".format(filename))
-                    return
-                else:
-                    # Write to file
-                    logger_file.info(data)
-
-                retries = -1
-            except urllib2.HTTPError as e:
-                error_msg = "Error code: {} - sleeping for _SEC_ seconds(s)".format(e.code)
-                retries = retry(retries, error_msg)
-                pass
-            except:
-                error_msg = "Unexpected error: {} - sleeping for _SEC_ seconds(s)".format(sys.exc_info()[0])
-                retries = retry(retries, error_msg)
-                pass
+        if last_indexes is None:
+            logger.info("Done for {}".format(filename))
+            return
+        else:
+            # Write to file
+            logger_file.info(data)
 
 # http://stackoverflow.com/a/28463266/1150923
 pool = ThreadPool(THREADS)
@@ -281,4 +303,4 @@ results = pool.map(run_fec_api, requests)
 pool.close()
 pool.join()
 
-logger.debug("All done: schedule_a and schedule_e. Total elapsed seconds: {}".format(time.time() - start_time))
+logger.debug("Schedule_e done. Total elapsed seconds: {}".format(time.time() - start_time))

@@ -378,10 +378,13 @@
         <option name="viz_halo.halo.group_outer_limit">10</option>
         <option name="viz_halo.halo.group_use_others_inner">true</option>
         <option name="viz_halo.halo.group_use_others_outer">true</option>
+        <option name="viz_halo.halo.label_dot_color">#000000</option>
         <option name="viz_halo.halo.label_font_size">13</option>
+        <option name="viz_halo.halo.label_line_color">#000000</option>
         <option name="viz_halo.halo.label_relax_delta">2</option>
+        <option name="viz_halo.halo.label_text_color">#000000</option>
         <option name="viz_halo.halo.label_wrap_length">500</option>
-        <option name="viz_halo.halo.outer_colors">schemeCategory20c</option>
+        <option name="viz_halo.halo.outer_colors">schemeCategory10</option>
         <option name="viz_halo.halo.outer_thickness">15</option>
         <option name="viz_halo.halo.thickness">10</option>
         <option name="viz_halo.halo.warning_override">false</option>

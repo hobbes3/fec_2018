@@ -135,6 +135,18 @@
                     "comment": ""
                 },
                 {
+                    "fieldName": "schedule_a_total",
+                    "owner": "f",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "schedule_a_total",
+                    "comment": ""
+                },
+                {
                     "fieldName": "_time",
                     "owner": "BaseEvent",
                     "type": "timestamp",
