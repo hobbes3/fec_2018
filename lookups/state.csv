@@ -7,7 +7,6 @@
 "Colorado","CO"
 "Connecticut","CT"
 "Delaware","DE"
-"District of Columbia","DC"
 "Florida","FL"
 "Georgia","GA"
 "Hawaii","HI"
@@ -50,3 +49,12 @@
 "West Virginia","WV"
 "Wisconsin","WI"
 "Wyoming","WY"
+American Samoa,AS
+District of Columbia,DC
+Federated States of Micronesia,FM
+Guam,GU
+Marshall Islands,MH
+Northern Mariana Islands,MP
+Palau,PW
+Puerto Rico,PR
+Virgin Islands,VI

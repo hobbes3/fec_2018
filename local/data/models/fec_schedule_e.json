@@ -135,7 +135,7 @@
                     "comment": ""
                 },
                 {
-                    "fieldName": "schedule_a_total",
+                    "fieldName": "total",
                     "owner": "f",
                     "type": "string",
                     "fieldSearch": "",
@@ -143,7 +143,43 @@
                     "multivalue": false,
                     "hidden": false,
                     "editable": true,
-                    "displayName": "schedule_a_total",
+                    "displayName": "total",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "office_full",
+                    "owner": "f",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "office_full",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "party_full",
+                    "owner": "f",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "party_full",
+                    "comment": ""
+                },
+                {
+                    "fieldName": "sub_id",
+                    "owner": "f",
+                    "type": "string",
+                    "fieldSearch": "",
+                    "required": false,
+                    "multivalue": false,
+                    "hidden": false,
+                    "editable": true,
+                    "displayName": "sub_id",
                     "comment": ""
                 },
                 {

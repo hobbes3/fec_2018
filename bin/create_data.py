@@ -100,7 +100,7 @@ candidate_lookup_header = [
     "party",
     "party_full",
     "incumbent_challenge",
-    "schedule_a_total",
+    "total",
 ]
 
 candidate_parameters = {
@@ -141,21 +141,20 @@ with open(SPLUNK_APP_PATH + "/lookups/candidates.csv", "wb") as csvfile:
             for key in candidate_lookup_header[:-1]:
                 row.append(candidate[key])
 
-            schedule_a_parameters = deepcopy(URL_PARAMETERS)
-            schedule_a_parameters.update({
-                "candidate_id": candidate_id
-            })
+            total_parameters = deepcopy(URL_PARAMETERS)
+            #total_parameters.update({
+            #})
 
-            schedule_a_url_parameters = urllib.urlencode(schedule_a_parameters, doseq=True)
-            schedule_a_full_url = URL_BASE + "schedules/schedule_a/by_size/by_candidate/?" + schedule_a_url_parameters
+            total_url_parameters = urllib.urlencode(total_parameters, doseq=True)
+            total_full_url = URL_BASE + "/candidate/" + candidate_id + "/totals/?" + total_url_parameters
 
-            schedule_a_data = url_open(schedule_a_full_url)
-            schedule_a_parsed_json = json.loads(schedule_a_data)
+            total_data = url_open(total_full_url)
+            total_parsed_json = json.loads(total_data)
 
-            total = 0
-
-            for result in schedule_a_parsed_json["results"]:
-                total += result["total"] or 0
+            if len(total_parsed_json["results"]) > 0:
+                total = total_parsed_json["results"][0]["receipts"]
+            else:
+                total = 0
 
             row.append(total)
 
@@ -172,79 +171,6 @@ with open(SPLUNK_APP_PATH + "/lookups/candidates.csv", "wb") as csvfile:
             page += 1
 
 logger.debug("Candidates.csv done. Total elapsed seconds: {}".format(time.time() - start_time))
-
-#committee_lookup_header = [
-#    "committee_id",
-#    "candidate_id",
-#    "name",
-#    "committee_type",
-#    "email",
-#    "website",
-#    "street_1",
-#    "street_2",
-#    "city",
-#    "state",
-#    "state_full",
-#    "zip",
-#    "designation",
-#    "designation_full",
-#    "party",
-#    "party_full",
-#    "form_type",
-#    "treasurer_name",
-#    "custodian_name_full",
-#]
-#
-#committee_parameters = {
-#    "sort": "name",
-#}
-#
-#parameters = URL_PARAMETERS.copy()
-#parameters.update(committee_parameters)
-#
-#committee_ids = []
-#
-#with open(SPLUNK_APP_PATH + "/lookups/fl_committees.csv", "wb") as csvfile:
-#    committee_lookup = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-#    committee_lookup.writerow(committee_lookup_header)
-#
-#    for candidate_id in candidate_ids:
-#        page = 1
-#        while True:
-#            parameters["page"] = page
-#            url_parameters = urllib.urlencode(parameters, doseq=True)
-#            full_url = URL_BASE + "candidate/" + candidate_id + "/committees/?" + url_parameters
-#
-#            logger.debug(full_url)
-#
-#            response = urllib2.urlopen(full_url)
-#            data = response.read().strip()
-#
-#            parsed_json = json.loads(data)
-#
-#            total_page = parsed_json["pagination"]["pages"]
-#
-#            for committee in parsed_json["results"]:
-#                committee_ids.append(committee["committee_id"])
-#
-#                row = []
-#                for key in committee_lookup_header:
-#                    if key=="candidate_id":
-#                        row.append(candidate_id)
-#                    else:
-#                        row.append(committee[key])
-#
-#                committee_lookup.writerow(row)
-#
-#            if page>=total_page:
-#                break
-#            else:
-#                page += 1
-#
-#logger.debug("fl_committees.csv done. Total elapsed seconds: {}".format(time.time() - start_time))
-
-#if TEST_LIMIT>0:
-#    committee_ids = committee_ids[:TEST_LIMIT]
 
 schedule_e_request = {
     "url": "schedules/schedule_e/",
